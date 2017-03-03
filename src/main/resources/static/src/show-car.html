@@ -1,0 +1,77 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/vaadin-grid/vaadin-grid.html">
+
+
+<dom-module id="show-car">
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+            vaadin-grid {
+                --primary-color: deeppink;
+            }
+        </style>
+
+        <vaadin-grid id="grid" items="{{cars}}" >
+            <table>
+                <colgroup>
+                    <col name="id" sortable>
+                    <col name="model" sortable>
+                    <col name="make" sortable>
+                    <col name="price" sortable>
+                    <col name="color" sortable>                
+                </colgroup>
+            </table>
+        </vaadin-grid>
+        
+    </template>
+    <script>
+        Polymer({
+            is: 'show-car',
+            properties: {
+                cars: {
+                    type: Array,
+                    value: []                    
+                },
+                selected: {
+                    type: Object,
+                    observer: '_observeSelected',
+                    notify: true                 
+                },
+                isSelected: {
+                    type: Boolean,
+                    value: false,
+                    notify: true,
+                    reflectToAttribute: true
+                }
+            },
+            _observeSelected: function(newValue, oldValue) {                
+                this.fire('car-changed', {car: this.selected});
+            },
+            attached: function() {
+                const self = this;
+                this.$.grid.addEventListener('selected-items-changed', function(e) {
+                    
+                    // returns an Array with the selected item index
+                    // if nothing is selected, [0] is returned
+                    let index = self.$.grid.selection.selected();
+
+                    console.log(index);
+                    //console.log(index.length);
+                    //console.log(index.length > 0);
+
+                    self.set('isSelected',index.length > 0);                    
+
+                    self.$.grid.getItem(index, (error, data) => {
+                        if (!error) {                            
+                            //console.log(data);
+                            self.selected = data;
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+</dom-module>
+

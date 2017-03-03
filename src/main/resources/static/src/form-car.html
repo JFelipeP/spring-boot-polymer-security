@@ -1,0 +1,54 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+
+<dom-module id="form-car">
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+        </style>
+
+       <form is="iron-form" id="form">
+
+          <paper-input label="Model" value="{{car.model}}" required></paper-input>
+          <paper-input label="Make" value="{{car.make}}" required></paper-input>          
+          <paper-input label="price" value="{{car.price}}" required></paper-input>
+          <paper-input label="Color" value="{{car.color}}" required></paper-input>
+
+          <paper-button raised on-tap="fireCreateCar">Save</paper-button>                         
+          <paper-button raised on-tap="fireCancelEvent">Cancel</paper-button>
+                    
+        </form>      
+        
+    </template>
+    <script>
+        Polymer({
+            is: 'form-car',
+            properties: {
+                car: {
+                    type: Object,
+                    value: {id: 0, model: '', make: '', price: 40000, color: ''},
+                    notify: true
+                },
+                form: {
+                    type: Object,
+                    value: function() {
+                        return this.$.form;
+                    }
+                }
+            },
+            fireCancelEvent: function() {
+                this.fire('on-form-cancel', {cancel: true});
+            },
+            fireCreateCar: function() {
+                this.fire('on-create-car', {create: true});
+            }
+        });
+    </script>
+</dom-module>
+

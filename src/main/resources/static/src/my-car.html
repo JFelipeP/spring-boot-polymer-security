@@ -1,0 +1,232 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+
+<link rel="import" href="show-car.html">
+<link rel="import" href="form-car.html">
+
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-car">
+  <template>
+    <style>
+      :host {
+        display: block;        
+      }
+      paper-dialog.colored {
+        color: steelblue;
+        width: 70%;
+      }
+      [hidden] {
+        display: none;
+      }
+      .buttons {
+        margin: 20px 0 20px 0;
+      }
+      paper-button {
+        background-color: cadetblue;
+        color: white;
+      }
+      
+    </style>    
+
+    
+    <iron-ajax      
+       id="ajax"
+       handle-as="json"
+       content-type="application/json"
+       on-response="handleResponse">
+    </iron-ajax>
+
+    <paper-dialog 
+      id="deleteDialog" 
+      on-iron-overlay-closed="deleteCar" 
+      entry-animation="scale-up-animation"
+      exit-animation="fade-out-animation" >
+        <h2>Delete Action</h2>
+        <p>Delete this item? if deleted it cannot be recovered anymore.</p>   
+        <div class="delete-buttons">     
+          <paper-button raised dialog-dismiss >Cancel</paper-button>        
+          <paper-button raised dialog-confirm autofocus>Delete</paper-button>  
+        </div>     
+    </paper-dialog>
+
+    
+    <paper-toast dynamic-align class="fit-bottom" id="toast" text="text"></paper-toast>
+    
+    <!-- buttons, dialog with form, show-car -->
+    <div class="buttons">
+        <paper-button raised id="add-book" on-tap="openForm">
+              <iron-icon icon="icons:add"></iron-icon>
+        </paper-button>
+        
+        <paper-button raised on-tap="updateCar" hidden$="[[!isItemSelected]]">          
+              <iron-icon icon="icons:create"></iron-icon>          
+        </paper-button>
+
+        <paper-button raised on-tap="callDeleteCar" hidden$="[[!isItemSelected]]">
+              <iron-icon icon="icons:delete" ></iron-icon>
+        </paper-button>
+    </div>
+
+    <paper-dialog
+        id="dialog" 
+        class="colored"        
+        no-cancel-on-outside-click
+        always-on-top 
+        dynamic-align
+        entry-animation="scale-up-animation"
+        exit-animation="fade-out-animation">
+
+      <h2>Create/Update car</h2>
+
+      <form-car id="formCar" car="{{car}}" ></form-car> 
+      
+    </paper-dialog>      
+
+    <show-car id="showCar" is-selected="{{isItemSelected}}" selected="{{carSelected}}" cars="[[cars]]"></show-car>  
+    
+    
+  </template>  
+
+  <script>
+    Polymer({
+      is: 'my-car',
+      properties: {
+        cars: {
+          type: Array,
+          value: function() {
+            return [
+              {"id": 1, "model": "Esport", "make": "Honda", "price": 20000, "color": "White"},
+              {"id": 2, "model": "Off Road", "make": "Toyota", "price": 20000, "color": "White"}
+            ];
+          }
+        },
+        car: {
+          type: Object,
+          value: {id: 0, model: '', make: '', price: 40000, color: ''},
+          notify: true
+        },
+        carSelected: {
+          type: Object,
+          observer: '_observeCarSelected'
+        },
+        isItemSelected: {
+          type: Boolean,
+          value: false,
+          observer: '_observeIsItemSelected'      
+        },
+        isGoingToUpdate: {
+          type: Boolean,
+          value: false
+        }
+      },      
+      _observeCarSelected: function(n, o) {
+         //console.info('new car selected:');
+         //console.log(n);
+      },
+      _observeIsItemSelected: function(n, o) {
+        console.log(n);
+        
+      },
+      ready: function() {
+        this.$.ajax.method = 'GET';
+        this.$.ajax.url = 'http://localhost:8080/car/api/json/cars';
+        this.$.ajax.generateRequest();
+      },
+      handleResponse: function(data) {
+        if (data.detail.response instanceof Array) { // after GET Request
+          console.log(data.detail.response);
+          this.set('cars', data.detail.response);
+        } else { // after POST Request
+          this.$.ajax.method = 'GET';
+          this.$.ajax.url = 'http://localhost:8080/car/api/json/cars';
+          this.$.ajax.generateRequest();
+        }
+        
+      },
+      openForm: function() {        
+        this.$.dialog.open();       
+      },
+      closeForm: function() {
+        this.$.dialog.close();       
+        this.set('car', {});        
+        this.set('isGoingToUpdate', false);
+      },
+      callDeleteCar: function() {
+        this.$.deleteDialog.open();
+      },
+      create: function() {
+        if (this.$.formCar.form.validate()) {
+
+          if (this.isGoingToUpdate == true) {            // update
+            
+            this.$.ajax.method = 'PUT';
+            this.$.ajax.url = 'http://localhost:8080/car/api/json/cars/' + this.carSelected.id;
+            this.$.ajax.body = this.car;            
+            this.$.ajax.generateRequest();            
+
+            this.closeForm();            
+            this.toast('Item updated!');
+
+          } else {
+            // create          
+
+            console.log('create');    
+
+            this.$.ajax.method = 'POST';
+            this.$.ajax.url = 'http://localhost:8080/car/api/json/cars';
+            this.$.ajax.body = this.car;
+            this.$.ajax.generateRequest();
+
+            this.closeForm();
+
+            this.car = {}; // clear the form
+
+            this.toast('New Item created!');
+
+          } // end else update
+
+
+          
+        }
+        
+      },
+      updateCar: function() {          
+          this.set('isGoingToUpdate', true);
+          this.set('car', this.carSelected);
+          this.openForm();
+      },
+      deleteCar: function(event) {
+
+          if (event.detail.confirmed) {
+            this.$.ajax.method = 'DELETE';
+            this.$.ajax.url = 'http://localhost:8080/car/api/json/cars/' + this.carSelected.id;
+            this.$.ajax.generateRequest();
+
+            this.toast('Item deleted!');
+          }
+          
+      },
+      attached: function() {
+        const self = this;
+        this.$.formCar.addEventListener('on-form-cancel', e => {
+          self.closeForm();          
+        });
+
+        this.$.formCar.addEventListener('on-create-car', e => {
+          self.create();         
+        });        
+
+      },
+      toast: function(message) {
+          this.$.toast.text = message;
+          this.$.toast.open();
+      }
+    });
+  </script>
+</dom-module>
