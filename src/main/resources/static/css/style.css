@@ -1,17 +1,25 @@
 
+.flex-box {	
+	width: 100%;
+	height: 98vh;	
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;	
+	box-sizing: border-box;
+}
 form.login {
 	border: 1px solid lightgrey;
 	border-radius: 5px;
 	background-color: steelblue;
 	color: white;
-	width: 400px;
-	height: 200px;
-	margin: 0 auto;
+	width: 300px;	
+	height: 200px;	
 	padding-left: 50px;
 	padding-right: 50px;
 	padding-top: 70px;
 	padding-bottom: 50px;
-	box-shadow: 5px 0 15px 0 grey;
+	box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.3);
 	
 }
 
@@ -45,25 +53,27 @@ form input[value="Logout"] {
 }
 
 .login-error {
-	color: white;
+	color: white;		
 	text-align: center;
 	border: 1px solid lightgrey;
-	border-radius: 5px;
+	border-radius: 2px;
 	background-color: deeppink;
+	box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.3);
 	padding: 10px;
-	width: 35%;
-	margin: 0 auto;	
+	width: 378px;
+	margin: 0 auto 5px auto;	
 }
 
 .logout-successful {	
 	color: white;
 	text-align: center;
 	border: 1px solid lightgrey;
-	border-radius: 5px;
+	border-radius: 2px;
 	background-color: olive;
+	box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.3);
 	padding: 10px;
-	width: 35%;
-	margin: 0 auto;
+	width: 378px;
+	margin: 0 auto 5px auto;
 }
 
 
